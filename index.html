@@ -1,0 +1,372 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pomodoro To-Do List</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            text-align: center;
+            color: #e74c3c;
+        }
+        .container {
+            display: flex;
+            gap: 20px;
+        }
+        .tasks-container {
+            flex: 1;
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .timer-container {
+            flex: 1;
+            background-color: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+        .task-form {
+            margin-bottom: 20px;
+            display: grid;
+            gap: 10px;
+        }
+        .task-form input, .task-form textarea, .task-form select, .task-form button {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        .task-form button {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        .task-list {
+            list-style-type: none;
+            padding: 0;
+        }
+        .task-item {
+            background-color: #f9f9f9;
+            padding: 10px;
+            margin-bottom: 10px;
+            border-radius: 4px;
+            border-left: 4px solid #e74c3c;
+        }
+        .task-item.completed {
+            opacity: 0.6;
+            border-left-color: #2ecc71;
+        }
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .task-title {
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        .task-actions {
+            display: flex;
+            gap: 5px;
+        }
+        .btn-complete, .btn-pomodoro {
+            background-color: #2ecc71;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .btn-pomodoro {
+            background-color: #e74c3c;
+        }
+        .timer {
+            font-size: 3em;
+            margin: 20px 0;
+            font-weight: bold;
+            color: #e74c3c;
+        }
+        .timer-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        .timer-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .timer-mode {
+            margin-bottom: 10px;
+            font-weight: bold;
+        }
+        .priority-high {
+            border-left-color: #e74c3c;
+        }
+        .priority-medium {
+            border-left-color: #f39c12;
+        }
+        .priority-low {
+            border-left-color: #3498db;
+        }
+        .task-meta {
+            font-size: 0.8em;
+            color: #888;
+            margin-top: 5px;
+        }
+        .pomodoro-count {
+            background-color: #e74c3c;
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7em;
+            margin-left: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Pomodoro To-Do List</h1>
+    
+    <div class="container">
+        <div class="tasks-container">
+            <h2>Your Tasks</h2>
+            
+            <form class="task-form" action="/add_task" method="POST">
+                <input type="text" name="title" placeholder="Task Title" required>
+                <textarea name="description" placeholder="Task Description"></textarea>
+                <select name="priority">
+                    <option value="low">Low Priority</option>
+                    <option value="medium" selected>Medium Priority</option>
+                    <option value="high">High Priority</option>
+                </select>
+                <button type="submit">Add Task</button>
+            </form>
+            
+            <ul class="task-list">
+                {% for task in tasks %}
+                {% if not task.completed %}
+                <li class="task-item priority-{{ task.priority }}">
+                    <div class="task-header">
+                        <span class="task-title">{{ task.title }}</span>
+                        <div class="task-actions">
+                            <button class="btn-pomodoro" data-id="{{ task.id }}" data-title="{{ task.title }}">
+                                Start Pomodoro
+                            </button>
+                            <form action="/complete_task/{{ task.id }}" method="POST" style="display: inline;">
+                                <button class="btn-complete" type="submit">Complete</button>
+                            </form>
+                        </div>
+                    </div>
+                    {% if task.description %}
+                    <p>{{ task.description }}</p>
+                    {% endif %}
+                    <div class="task-meta">
+                        Created: {{ task.created_at }}
+                        <span class="pomodoro-count" title="Pomodoros completed">
+                            {{ task.pomodoros_completed }}
+                        </span>
+                    </div>
+                </li>
+                {% endif %}
+                {% endfor %}
+            </ul>
+            
+            <h3>Completed Tasks</h3>
+            <ul class="task-list">
+                {% for task in tasks %}
+                {% if task.completed %}
+                <li class="task-item completed">
+                    <div class="task-header">
+                        <span class="task-title">{{ task.title }}</span>
+                    </div>
+                    {% if task.description %}
+                    <p>{{ task.description }}</p>
+                    {% endif %}
+                    <div class="task-meta">
+                        Created: {{ task.created_at }}
+                        <span class="pomodoro-count" title="Pomodoros completed">
+                            {{ task.pomodoros_completed }}
+                        </span>
+                    </div>
+                </li>
+                {% endif %}
+                {% endfor %}
+            </ul>
+        </div>
+        
+        <div class="timer-container">
+            <h2>Pomodoro Timer</h2>
+            <div class="timer-mode">Work Mode</div>
+            <div class="timer" id="timer">25:00</div>
+            <div id="current-task">Select a task to start</div>
+            <div class="timer-buttons">
+                <button class="timer-btn" id="start-btn">Start</button>
+                <button class="timer-btn" id="pause-btn" disabled>Pause</button>
+                <button class="timer-btn" id="reset-btn">Reset</button>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Timer variables
+        let timerInterval;
+        let minutes = 25;
+        let seconds = 0;
+        let isPaused = true;
+        let isWorkMode = true;
+        let currentTaskId = null;
+        
+        // Audio for timer completion
+        const timerAudio = new Audio("https://soundbible.com/grab.php?id=1746&type=mp3");
+        
+        // Add event listeners
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add event listeners to all pomodoro buttons
+            const pomodoroButtons = document.querySelectorAll('.btn-pomodoro');
+            pomodoroButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const taskId = this.getAttribute('data-id');
+                    const taskTitle = this.getAttribute('data-title');
+                    startPomodoroForTask(taskId, taskTitle);
+                });
+            });
+            
+            // Add event listeners to timer control buttons
+            document.getElementById('start-btn').addEventListener('click', startTimer);
+            document.getElementById('pause-btn').addEventListener('click', pauseTimer);
+            document.getElementById('reset-btn').addEventListener('click', resetTimer);
+        });
+        
+        // Function to update the timer display
+        function updateTimerDisplay() {
+            document.getElementById('timer').textContent = 
+                `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        }
+        
+        // Function to start the timer
+        function startTimer() {
+            if (isPaused) {
+                isPaused = false;
+                document.getElementById('start-btn').disabled = true;
+                document.getElementById('pause-btn').disabled = false;
+                
+                timerInterval = setInterval(() => {
+                    if (seconds === 0) {
+                        if (minutes === 0) {
+                            clearInterval(timerInterval);
+                            timerAudio.play();
+                            
+                            if (isWorkMode) {
+                                // Work session completed
+                                if (currentTaskId) {
+                                    updatePomodoroCount(currentTaskId);
+                                }
+                                // Switch to break mode
+                                isWorkMode = false;
+                                minutes = 5;
+                                document.querySelector('.timer-mode').textContent = 'Break Mode';
+                                document.querySelector('.timer-mode').style.color = '#2ecc71';
+                                document.getElementById('timer').style.color = '#2ecc71';
+                            } else {
+                                // Break completed, switch back to work mode
+                                isWorkMode = true;
+                                minutes = 25;
+                                document.querySelector('.timer-mode').textContent = 'Work Mode';
+                                document.querySelector('.timer-mode').style.color = '#e74c3c';
+                                document.getElementById('timer').style.color = '#e74c3c';
+                            }
+                            
+                            seconds = 0;
+                            updateTimerDisplay();
+                            isPaused = true;
+                            document.getElementById('start-btn').disabled = false;
+                            document.getElementById('pause-btn').disabled = true;
+                            return;
+                        }
+                        minutes--;
+                        seconds = 59;
+                    } else {
+                        seconds--;
+                    }
+                    updateTimerDisplay();
+                }, 1000);
+            }
+        }
+        
+        // Function to pause the timer
+        function pauseTimer() {
+            if (!isPaused) {
+                isPaused = true;
+                clearInterval(timerInterval);
+                document.getElementById('start-btn').disabled = false;
+                document.getElementById('pause-btn').disabled = true;
+            }
+        }
+        
+        // Function to reset the timer
+        function resetTimer() {
+            pauseTimer();
+            
+            if (isWorkMode) {
+                minutes = 25;
+            } else {
+                minutes = 5;
+            }
+            
+            seconds = 0;
+            updateTimerDisplay();
+        }
+        
+        // Function to start a pomodoro for a specific task
+        function startPomodoroForTask(taskId, taskTitle) {
+            // Reset and prepare for a new pomodoro
+            pauseTimer();
+            isWorkMode = true;
+            minutes = 25;
+            seconds = 0;
+            updateTimerDisplay();
+            
+            // Set the current task
+            currentTaskId = taskId;
+            document.getElementById('current-task').textContent = `Working on: ${taskTitle}`;
+            document.querySelector('.timer-mode').textContent = 'Work Mode';
+            document.querySelector('.timer-mode').style.color = '#e74c3c';
+            document.getElementById('timer').style.color = '#e74c3c';
+            
+            // Start the timer
+            startTimer();
+        }
+        
+        // Function to update the pomodoro count for a task
+        function updatePomodoroCount(taskId) {
+            fetch(`/update_pomodoro/${taskId}`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                }
+            });
+        }
+        
+        // Initialize the timer display
+        updateTimerDisplay();
+    </script>
+</body>
+</html>
