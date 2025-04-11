@@ -161,12 +161,10 @@ The timer implementation follows the rules of the Pomodoro Technique:
   
 3. Automatic switching between work and break modes
   
-
 4. Current mode indicators (RED for  work, GREEN for break)
   
 5. Timed announcements for specified durations  
 
-The system updates the pomodoro count of the relevant task after every work session via an AJAX interaction with the server, completing the cycle.   
 
 ### Task Priority System  
 
