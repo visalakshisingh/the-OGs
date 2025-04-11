@@ -240,3 +240,7 @@ python project.py
 ## Application Overview  
 
 The Flask web framework is combined with frontend technologies in this Pomodoro To-Do List application to showcase ingenuity. The project aims to provide productivity with the basic web development principles such as route management, data storage, server-client interaction, and GUI design. The modular design of the application along with its extensive testing guarantees dependability while enabling refinements and enhancements.
+
+
+
+external source- Claude A.I for assistance in certain aspects
