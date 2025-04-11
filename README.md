@@ -192,12 +192,6 @@ This assists in visual identification of urgent tasks with set colors.
 
 **Solution**: JavaScript's setInterval was used for countdown purposes with state variables to track the current mode.
 
-### Special Characters in Task Titles  
-
-**Problem**: Task titles that include special characters might render JavaScript functions inoperable.  
-
-**Solution**: Task information was retrieved and stored using event listeners instead of inline JavaScript to prevent XSS attacks.
-
 ### Test Environment Isolation
 
 **Problem**: Functions could be tested, but there was no way to do so without affecting application data.  
